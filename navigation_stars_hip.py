@@ -4,7 +4,13 @@ import re
 import pandas as pd
 import requests
 
-def read_wiki_navigation_stars_table(html):
+def load_hipparcos():
+    with load.open(hipparcos.URL) as f:
+        return hipparcos.load_dataframe(f)
+
+def read_wiki_navigation_stars_table(html=None):
+    if html is None:
+        html = requests.get('https://en.wikipedia.org/wiki/List_of_stars_for_navigation').text
     re_IS = re.I + re.S
     remove_tags = lambda x: re.sub(r'</?(a|b|br|span|sup|sub)\b[^>]*>', ' ', x).strip().rstrip()
     for table in re.findall(r'<table\b[^>]*>(.*?)</table>', html, re_IS):
@@ -59,16 +65,13 @@ def get_hip_dataframe(df_navigation):
     return pd.DataFrame(rows, columns=headers)
 
 if __name__ == '__main__':
-    with load.open(hipparcos.URL) as f:
-        df = hipparcos.load_dataframe(f)
-    
+    df = load_hipparcos()
+
     df_bright = df[df.magnitude <= 3.5].sort_values('magnitude')
     print(f'Loaded {df_bright.shape[0]} bright stars from hipparcos')
 
-    wiki_bright_stars_page = requests.get('https://en.wikipedia.org/wiki/List_of_stars_for_navigation').text
-    print(f'Read {len(wiki_bright_stars_page)} bytes from wiki page')
-
-    df_navigation = read_wiki_navigation_stars_table(wiki_bright_stars_page)
+    df_navigation = read_wiki_navigation_stars_table()
     print(f'Read {df_navigation.shape[0]} navigation stars from wiki table')
-    
-    print(get_hip_dataframe(df_navigation))
+
+    df_nav_star_hip = get_hip_dataframe(df_navigation)
+    df_nav_star_hip.to_csv('nav_star_hip.csv', index=False)
