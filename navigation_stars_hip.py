@@ -52,7 +52,7 @@ def search_hip(df, ra, dec, mag):
         return df2.index[0], list(df2.iloc[0][['SSE', 'ra_degrees', 'dec_degrees', 'magnitude']])
     return None, None
 
-def get_hip_dataframe(df_navigation):
+def get_hip_dataframe(df_navigation, df_bright):
     headers = ['Common name', 'Bayer designation', 'Hip', 'SSE', 'Wiki RA', 'Hip RA', 'Wiki dec', 'Hip dec', 'Wiki mag', 'Hip mag']
     rows = []
     for idx in df_navigation.index:
